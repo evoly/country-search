@@ -1,6 +1,6 @@
 import './css/main.css';
 
-// import App from './view/PageLayout';
+import App from './view/App';
 
 const root = document.getElementById('root');
 

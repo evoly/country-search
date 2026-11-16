@@ -1,0 +1,215 @@
+:root {
+    --text-color: #1e2420;
+    --text-color-light: #5a645f;
+    --background-color: #fbf7ee;
+    --btn-text: #7a4d06;
+    --btn-background: #fff;
+    --btn-hover: var(--background-color);
+    --card-border: #e4dccb;
+    --dark-background: #f6efe0;
+    --modalbackprop: #2f2a21f2;
+
+    --transition: all ease-in 0.3s;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.hidden {
+    display: none !important;
+}
+
+html {
+    font-size: 10px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-color);
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-family: 'Bricolage Grotesque', sans-serif;
+
+    @media (max-width: 380px) {
+        font-size: 1.3rem;
+    }
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.country-search {
+    max-width: 760px;
+    padding-top: clamp(64px, 13vh, 140px);
+    padding-bottom: 64px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--btn-text);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.eyebrow::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #a46a22;
+}
+
+.country-search h1 {
+    max-width: 650px;
+    margin: 22px 0 18px;
+    font-size: clamp(4rem, 8vw, 6rem);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.055em;
+    text-wrap: balance;
+}
+
+.search-description {
+    margin: 0 0 42px;
+    color: var(--text-color-light);
+    font-size: 1.7rem;
+    line-height: 1.7;
+}
+
+.search-label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.search-field {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 70px;
+    padding: 0 22px;
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    background: #fffdf9;
+    box-shadow: 0 4px 16px rgb(61 44 17 / 3%);
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background-color 180ms ease;
+}
+
+.search-field:hover {
+    border-color: #b8aa90;
+}
+
+.search-field:focus-within {
+    border-color: #9c702f;
+    background: #fff;
+    box-shadow:
+        0 0 0 4px rgb(156 112 47 / 12%),
+        0 8px 24px rgb(61 44 17 / 5%);
+}
+
+.search-icon {
+    position: relative;
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+    margin-right: 3px;
+    border: 1.8px solid var(--text-color-light);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.search-icon::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    bottom: -3px;
+    width: 7px;
+    height: 1.8px;
+    border-radius: 2px;
+    background: var(--text-color-light);
+    transform: rotate(45deg);
+}
+
+.search-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 68px;
+    padding: 0;
+    border: 0;
+    outline: none;
+    /* The wrapper supplies the visible focus ring. */
+    background: transparent;
+    color: var(--text-color);
+    font: inherit;
+    font-size: 1.7rem;
+    caret-color: var(--btn-text);
+}
+
+.search-input::placeholder {
+    color: #7c8179;
+    opacity: 1;
+}
+
+.search-hint {
+    margin: 14px 2px 0;
+    color: var(--text-color-light);
+    font-size: 1.3rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+    .search-description {
+        margin-bottom: 32px;
+        font-size: 1.6rem;
+    }
+
+    .search-field {
+        gap: 14px;
+        padding-inline: 18px;
+    }
+
+    .search-input {
+        font-size: 1.6rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .search-field {
+        transition: none;
+    }
+}
