@@ -1,3 +1,6 @@
+@import './cards.css';
+@import './pagination.css';
+
 :root {
     --text-color: #1e2420;
     --text-color-light: #5a645f;
@@ -58,14 +61,13 @@ ul {
 
 .container {
     width: 100%;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     padding-left: 20px;
     padding-right: 20px;
 }
 
 .country-search {
-    max-width: 760px;
     padding-top: clamp(64px, 13vh, 140px);
     padding-bottom: 64px;
 }
@@ -211,5 +213,127 @@ ul {
 @media (prefers-reduced-motion: reduce) {
     .search-field {
         transition: none;
+    }
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.search-feedback {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 28px;
+    margin: 16px 2px 0;
+    font-size: 1.4rem;
+    line-height: 1.6;
+}
+
+.search-feedback-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-status {
+    margin: 0;
+    color: var(--text-color-light);
+}
+
+.search-status-detail {
+    margin: 4px 0 0;
+    color: var(--text-color-light);
+    overflow-wrap: anywhere;
+}
+
+.search-feedback[data-state='success'] .search-status {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.search-feedback[data-state='empty'],
+.search-feedback[data-state='error'] {
+    padding: 18px 20px;
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    background: var(--dark-background);
+}
+
+.search-feedback[data-state='empty'] .search-status,
+.search-feedback[data-state='error'] .search-status {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.search-feedback[data-state='error'] {
+    border-color: #e4c6b9;
+    background: #fff4ee;
+}
+
+.search-feedback[data-state='error'] .search-status {
+    color: #8b4029;
+}
+
+.search-spinner {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    border: 2px solid var(--card-border);
+    border-top-color: var(--btn-text);
+    border-radius: 50%;
+    animation: search-spin 800ms linear infinite;
+}
+
+.search-retry {
+    flex-shrink: 0;
+    align-self: center;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid #c4a877;
+    border-radius: 10px;
+    background: var(--btn-background);
+    color: var(--btn-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease;
+}
+
+.search-retry:hover {
+    border-color: var(--btn-text);
+    background: var(--btn-hover);
+}
+
+.search-retry:focus-visible {
+    outline: 2px solid var(--btn-text);
+    outline-offset: 3px;
+}
+
+@keyframes search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .search-feedback[data-state='error'] {
+        flex-wrap: wrap;
+    }
+
+    .search-feedback[data-state='error'] .search-feedback-text {
+        flex-basis: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .search-retry {
+        transition: none;
+    }
+
+    .search-spinner {
+        animation: none;
     }
 }
