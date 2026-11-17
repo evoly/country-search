@@ -1,9 +1,7 @@
-export type Country = {
-    name: {
-        common: string;
-    };
-    cca2: string;
-};
+import { HttpError } from './HttpError';
+import type { CountryApiResponse } from './countries/country.types';
+
+export type Country = CountryApiResponse;
 
 export const state: { countries: Country[] } = {
     countries: [],
@@ -27,7 +25,7 @@ export async function searchCountries(query: string, signal?: AbortSignal): Prom
     }
 
     if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
+        throw new HttpError(response.status);
     }
 
     const countries: Country[] = await response.json();
