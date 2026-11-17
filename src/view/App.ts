@@ -1,5 +1,5 @@
 import { createEl } from '../helpers';
-import { createCountrySearch, type SearchState } from '../search';
+import { createCountrySearch, type SearchState } from '../createCountrySearch';
 import { mapCountryResponse } from '../countries/mapCountryResponse';
 import { createCountryCard } from './CountryCard';
 
