@@ -44,6 +44,7 @@ export const createCountrySearch = ({ onStateChange, debounceMs, timeoutMs }: Se
 
             if (signal.aborted || activeController !== controller) return;
 
+            state.countries = countries;
             onStateChange(countries.length ? { status: 'success', query, countries } : { status: 'empty', query });
         } catch (error: unknown) {
             // Проверяем ручную отмену отдельно от таймаута.

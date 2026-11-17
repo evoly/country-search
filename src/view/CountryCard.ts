@@ -1,4 +1,5 @@
 import { createEl } from '../helpers';
+import { searchCountries } from '../searchCountries';
 import type { CountryApiResponse, CountryCard } from '../countries/country.types';
 
 const numberFormatter = new Intl.NumberFormat('en-US', {
@@ -139,15 +140,7 @@ const hasDetails = (country: CountryCard): boolean =>
 const fetchDetails = async (country: CountryCard, signal: AbortSignal): Promise<CountryCard> => {
     const normalizedQuery = country.name.trim().toLowerCase();
 
-    const response = await fetch(`https://countries.dev/name/${encodeURIComponent(normalizedQuery)}`, { signal });
-
-    if (!response.ok) {
-        throw new Error('Country details request failed');
-    }
-
-    const payload = await response.json();
-
-    const countries: CountryApiResponse[] = Array.isArray(payload) ? payload : [payload];
+    const countries = await searchCountries(normalizedQuery, signal);
 
     const result = countries.find((item) => {
         const name = typeof item?.name === 'string' ? item.name : item?.name?.common;
