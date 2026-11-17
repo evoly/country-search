@@ -47,7 +47,7 @@ describe('mapCountryResponse', () => {
     it('возвращает заглушку, если поле capital отсутствует', () => {
         const raw = { ...spainFixture, capital: null };
 
-        expect(mapCountryResponse(raw).capital).toBe('Нет данных');
+        expect(mapCountryResponse(raw).capital).toBe('No official capital');
     });
 
     it('не изменяет исходные данные', () => {
