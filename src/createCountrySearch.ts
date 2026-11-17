@@ -77,14 +77,18 @@ export const createCountrySearch = ({ onStateChange, debounceMs, timeoutMs }: Se
     }, debounceMs);
 
     return {
-        search(value: string): void {
+        search(value: string, { immediate = false }: { immediate?: boolean } = {}): void {
             lastQuery = value.trim();
             const controller = prepareRequest();
 
             onStateChange({ status: 'idle' });
 
-            // Пустой запрос тоже сбрасывает предыдущий debounce.
-            debouncedSearch(lastQuery, controller);
+            if (immediate) {
+                void runSearch(lastQuery, controller);
+            } else {
+                // Пустой запрос тоже сбрасывает предыдущий debounce.
+                debouncedSearch(lastQuery, controller);
+            }
         },
 
         retry(): void {

@@ -2,6 +2,8 @@ import { createEl } from '../helpers';
 import { createCountrySearch, type SearchState } from '../createCountrySearch';
 import { mapCountryResponse } from '../countries/mapCountryResponse';
 import { createCountryCard } from './CountryCard';
+import { createSearchHistory } from '../searchHistory';
+import { createSearchHistoryView } from './SearchHistory';
 
 const DEBOUNCE_DELAY_MS = 300;
 const REQUEST_TIMEOUT_MS = 5000;
@@ -30,6 +32,17 @@ const App = () => {
         htmlFor: 'country-search',
         textContent: 'Where are we heading?',
     });
+
+    const history = createSearchHistory(() => window.localStorage);
+    const historyView = createSearchHistoryView((query) => {
+        input.value = query;
+        input.focus();
+        countrySearch.search(query, { immediate: true });
+    });
+    historyView.render(history.getQueries());
+
+    const searchHeader = createEl('div', { className: 'search-header' });
+    searchHeader.append(label, historyView.element);
 
     const searchField = createEl('div', {
         className: 'search-field',
@@ -87,6 +100,10 @@ const App = () => {
     results.setAttribute('aria-label', 'Country search results');
 
     const renderSearchState = (next: SearchState): void => {
+        if (next.status === 'success' || next.status === 'empty') {
+            historyView.render(history.add(next.query));
+        }
+
         results.replaceChildren();
         results.hidden = true;
         feedback.dataset.state = next.status;
@@ -155,7 +172,7 @@ const App = () => {
     feedback.append(spinner, feedbackText, retryButton);
     searchField.append(icon, input);
 
-    main.append(eyebrow, h1, descr, label, searchField, feedback, results);
+    main.append(eyebrow, h1, descr, searchHeader, searchField, feedback, results);
 
     // Будущие карточки тут
 
