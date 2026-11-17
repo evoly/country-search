@@ -2,5 +2,16 @@ export function debounce<This, Args extends unknown[]>(
     fn: (this: This, ...args: Args) => unknown,
     delay: number,
 ): (this: This, ...args: Args) => void {
-    throw new Error(`not implemented for ${fn} and ${delay}`);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    return function (this: This, ...args: Args): void {
+        if (timer !== undefined) {
+            clearTimeout(timer);
+        }
+
+        timer = setTimeout(() => {
+            timer = undefined;
+            fn.apply(this, args);
+        }, delay);
+    };
 }
