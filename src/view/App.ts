@@ -3,7 +3,7 @@ import { createCountrySearch, type SearchState } from '../createCountrySearch';
 import { mapCountryResponse } from '../countries/mapCountryResponse';
 import { createCountryCard } from './CountryCard';
 
-const DEBOUNCE_DELAY_MS = 2300;
+const DEBOUNCE_DELAY_MS = 300;
 const REQUEST_TIMEOUT_MS = 5000;
 
 const App = () => {
