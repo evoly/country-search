@@ -23,6 +23,7 @@ export const createCountrySearch = ({ onStateChange, debounceMs, timeoutMs }: Se
     let activeController: AbortController | undefined;
 
     const prepareRequest = (): AbortController => {
+        activeController?.abort();
         activeController = new AbortController();
         state.countries = [];
 
