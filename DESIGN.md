@@ -31,8 +31,12 @@ Inside `runSearch`, two cancellation sources are combined:
 const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(timeoutMs)]);
 ```
 
-The combined signal passes through `searchCountries` to `fetch`, covering both the request and response-body
-reading. The timeout starts when the request starts, excluding the debounce interval.
+The combined signal is passed to `searchCountries` for this caller. Each shared HTTP request has its own
+transport controller, covering both the request and response-body reading. Cancelling a caller immediately
+rejects its wrapper promise and removes its abort listener. The transport is aborted only when no callers
+remain, so one caller cannot cancel work needed by another. With a single caller, new input still aborts
+the actual fetch immediately, before debounce. A timeout rejects the affected caller with its original
+`TimeoutError` reason. The timeout starts when `runSearch` runs, excluding the debounce interval.
 It is configured as **5000 ms** through `REQUEST_TIMEOUT_MS` in [src/view/App.ts](src/view/App.ts).
 
 Results and errors are handled separately:
@@ -100,9 +104,38 @@ Network requests, JSON parsing, and DOM construction are outside this estimate.
 
 ### Caching and request deduplication
 
-The current implementation does not cache search results by query or deduplicate concurrent search requests.
-The exported `state.countries` in `src/searchCountries.ts` stores the current array, rather than results
-for multiple queries. Repeating the same search makes another API request.
+[src/searchCountries.ts](src/searchCountries.ts) provides `createCountrySearchClient`, which creates two maps:
+
+- `cache` stores completed country arrays by a trimmed, lowercase query key. Successful responses and empty
+  HTTP 404 results are cached. HTTP failures, network errors, and cancelled requests are not cached.
+- `pending` stores one transport promise and a private `AbortController` per query, together with a subscriber
+  count. Concurrent identical searches reuse this transport promise, while each caller receives a separate
+  wrapper promise governed by its own signal.
+
+When one caller cancels or times out, only its wrapper rejects. Other subscribers keep waiting for the shared
+response. When the last caller cancels, the pending entry is removed immediately and the transport is aborted.
+An identical query can then start a fresh request without waiting for the old request to finish rejecting.
+Cleanup checks entry identity so an older request cannot remove its replacement, and an aborted transport
+cannot populate the cache even if a mock or transport delivers a late response.
+
+The exported `searchCountries` function uses one shared client for ordinary searches, history selections,
+and country-detail loading. Tests create fresh clients to keep caches independent between cases.
+`createCountrySearch.runSearch` updates `state.countries` only after checking that its result is still current;
+the shared transport itself does not update UI state. Cached arrays are reused by reference and treated as
+read-only by consumers; mapping creates new card objects.
+
+Let `Q` be the query length. Normalizing the query takes `O(Q)`. Map lookup, insertion, and deletion take
+expected `O(1)` time under the usual hash-table model, with string hashing potentially adding `O(Q)`.
+A cache hit therefore takes `O(Q)` time without copying or remapping the stored response. Joining an existing
+request also takes `O(Q)` time and adds `O(1)` caller state. Settling a shared response takes `O(S)` to notify
+its `S` attached caller promises, in addition to the cost of JSON parsing.
+
+Let `C` be the number of cached queries and `P` the number of pending queries. Excluding response-body buffers,
+memory is `O(C + P + S + ΣQᵢ + ΣDᵢ)`, where `S` counts caller wrappers attached to pending transport promises,
+`Qᵢ` accounts for stored query keys, and `Dᵢ` accounts for cached response data. There is no TTL or size limit:
+the cache is kept in memory for the page session and resets on reload. Query history persists separately.
+
+### Country-detail cache
 
 [src/view/CountryCard.ts](src/view/CountryCard.ts) contains a separate
 `detailsCache: Map<string, CountryCard>`. It stores successfully loaded **country details by country name**,
@@ -136,8 +169,8 @@ for a stored JSON payload of `B` characters, including parsing and validation.
 
 [src/view/SearchHistory.ts](src/view/SearchHistory.ts) renders accessible buttons next to the search label.
 On narrow screens, they wrap below it. Selecting a query fills and focuses the input and starts an immediate
-search. History stores query strings rather than API responses, so selecting an item currently makes a new
-network request; search-result caching remains separate optional work.
+search. History stores query strings rather than API responses. Selecting an item reuses the in-memory query
+cache when available; after a page reload, the first search for that query needs a network request.
 
 ## 4. Clean code principles
 
@@ -152,5 +185,5 @@ network request; search-result caching remains separate optional work.
 | Named configuration values                      | `DEBOUNCE_DELAY_MS` and `REQUEST_TIMEOUT_MS` in `src/view/App.ts` communicate both the purpose and units of the timing settings.                                                                                                                                                                         |
 | Reusable focused functions                      | `prepareRequest` in `src/createCountrySearch.ts` shares request preparation between search and retry. `createEl` in `src/helpers.ts` reduces repeated DOM creation code. `createFlag` and formatting functions in `src/view/CountryCard.ts` support both cards and details.                              |
 
-The purity claim applies specifically to `mapCountryResponse`. `searchCountries` performs side effects,
-including updating the exported `state.countries`, while view functions interact with the DOM.
+The purity claim applies specifically to `mapCountryResponse`. The search client performs network requests
+and maintains its cache; `createCountrySearch` updates search state, while view functions interact with the DOM.
