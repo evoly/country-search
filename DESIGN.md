@@ -21,6 +21,9 @@ request starts would allow the outdated response to appear during the debounce i
 Empty input follows the same path: it aborts the active request and resets the previous debounce timer.
 When the delayed callback runs, `runSearch` exits without calling `fetch` because the query is empty.
 `retry()` immediately repeats `lastQuery`, bypassing debounce and aborting any previous operation.
+Selecting a recent query calls `search(query, { immediate: true })`, which also bypasses debounce and uses
+the same cancellation and error-handling path. Any previously scheduled callback belongs to an aborted
+controller and cannot start another request.
 
 Inside `runSearch`, two cancellation sources are combined:
 
@@ -61,11 +64,10 @@ The current `DEBOUNCE_DELAY_MS` value in [src/view/App.ts](src/view/App.ts) is *
 The custom [debounce](src/debounce.ts) implementation resets the previous timer and invokes the function with
 the latest arguments only after input has stopped for the configured interval.
 
-This setting prioritizes reducing intermediate requests to the public API: continuous typing and short pauses
-do not trigger searches. The tradeoff is noticeable latency. After the final character, the user waits
-2.3 seconds before the request starts, followed by the network response time. The loading indicator appears
-only when the request actually starts. This is a conservative setting, not an optimum established through
-measurement; a delay of 300–500 ms would be worth evaluating for a more responsive live search.
+The 300 ms delay groups keystrokes separated by short pauses while keeping the wait after typing brief.
+It balances reducing intermediate API requests with responsiveness: the request starts 0.3 seconds after
+the final input event, followed by the network response time. The loading indicator appears only when
+the request actually starts. This is a practical starting point, not an optimum established through measurement.
 
 Without debounce, every non-empty input change would start a request. Even with immediate cancellation,
 some work may already have started in the browser and on the server. This increases request volume and
@@ -75,8 +77,8 @@ A much longer delay would reduce requests during pauses in typing, but leave the
 for longer and make it feel slow. Debounce controls request frequency; it does not replace cancellation
 or a network timeout. Explicit retries through `retry()` bypass the debounce delay.
 
-The debounce and search-controller tests use values including **300 ms**. These are test parameters,
-not the current interface setting; `debounceMs` is passed into `createCountrySearch`.
+The debounce and search-controller tests also use **300 ms** in some scenarios. Tests configure this value
+independently through the `debounceMs` option. History selections and explicit retries bypass the delay.
 
 ## 3. Computational complexity
 
@@ -116,6 +118,26 @@ of the stored country data. With bounded key and entry sizes, this simplifies to
 
 The cache has no TTL or size limit; entries remain until the page reloads. It stores completed objects,
 not pending promises, so it does not itself deduplicate requests in flight.
+
+### Recent search history
+
+[src/searchHistory.ts](src/searchHistory.ts) stores the five latest unique completed queries in localStorage
+under `country-search:history`, newest first. Queries are trimmed and deduplicated without regard to case.
+Only `success` and `empty` results are recorded, so intermediate keystrokes, cancelled searches, and failures
+do not fill the history. Repeating a query moves it to the front.
+
+The storage provider is injected so the history model can be tested without a browser. Malformed stored data
+is ignored. If storage access or writing fails, search continues and new history remains available in memory
+for the current session.
+
+Let `H` be the history limit and `Q` the maximum query length. Adding a query and serializing the updated list
+take `O(H × Q)` time and memory. With `H = 5`, this is `O(Q)`. Restoring history takes `O(B)` time and memory
+for a stored JSON payload of `B` characters, including parsing and validation.
+
+[src/view/SearchHistory.ts](src/view/SearchHistory.ts) renders accessible buttons next to the search label.
+On narrow screens, they wrap below it. Selecting a query fills and focuses the input and starts an immediate
+search. History stores query strings rather than API responses, so selecting an item currently makes a new
+network request; search-result caching remains separate optional work.
 
 ## 4. Clean code principles
 
