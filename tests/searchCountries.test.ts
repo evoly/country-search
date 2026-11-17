@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { searchCountries } from '../src/searchCountries';
+import { createCountrySearchClient } from '../src/searchCountries';
 
 const fetchMock = vi.fn<typeof fetch>();
+let searchCountries: ReturnType<typeof createCountrySearchClient>;
 
 beforeEach(() => {
     vi.stubGlobal('fetch', fetchMock);
+    searchCountries = createCountrySearchClient();
 });
 
 afterEach(() => {
@@ -21,7 +23,7 @@ describe('searchCountries', () => {
         await expect(searchCountries('France')).resolves.toEqual(countries);
     });
 
-    it('кодирует query в URL и передаёт signal в fetch', async () => {
+    it('кодирует query в URL и передаёт отдельный транспортный signal в fetch', async () => {
         const controller = new AbortController();
 
         fetchMock.mockResolvedValue(new Response('[]', { status: 200 }));
@@ -32,9 +34,10 @@ describe('searchCountries', () => {
         expect(fetchMock).toHaveBeenCalledWith(
             'https://countries.dev/name/South%20Africa',
             expect.objectContaining({
-                signal: controller.signal,
+                signal: expect.any(AbortSignal),
             }),
         );
+        expect(fetchMock.mock.calls[0]?.[1]?.signal).not.toBe(controller.signal);
     });
 
     it('не делает запрос для пустого query', async () => {
@@ -64,11 +67,10 @@ describe('searchCountries', () => {
 
     it('пробрасывает ошибку отмены запроса', async () => {
         const controller = new AbortController();
-        controller.abort();
-
         const error = new DOMException('Aborted', 'AbortError');
-        fetchMock.mockRejectedValue(error);
+        controller.abort(error);
 
         await expect(searchCountries('France', controller.signal)).rejects.toBe(error);
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 });
