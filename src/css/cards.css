@@ -1,0 +1,384 @@
+.country-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.country-card {
+    --country-ink: #111;
+    --country-muted: #666;
+    --country-line: #e5e5e5;
+
+    position: relative;
+    min-width: 0;
+    padding: 25px;
+    border: 1px solid var(--country-line);
+    border-radius: 32px;
+    background: #fcfcfc;
+    color: var(--country-ink);
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.country-card:hover {
+    border-color: #b9b9b9;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 5%);
+}
+
+.country-card-header {
+    display: grid;
+    grid-template-columns: 28.5% minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 31px;
+}
+
+.country-card-flag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: 26px;
+    background: #f0f0f0;
+}
+
+.country-card-flag-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.country-card-flag-fallback {
+    font-size: 56px;
+    line-height: 1;
+}
+
+.country-card-flag-image[hidden],
+.country-card-flag-fallback[hidden],
+.country-modal-retry[hidden] {
+    display: none;
+}
+
+.country-card-heading {
+    min-width: 0;
+}
+
+.country-card-name {
+    margin: 0;
+    color: inherit;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+}
+
+.country-card-region {
+    margin: 12px 0 0;
+    color: var(--country-muted, #666);
+    font-size: 22px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.country-card-code {
+    align-self: start;
+    padding-top: 28px;
+    color: #929292;
+    font-size: 18px;
+    line-height: 1.4;
+}
+
+.country-card-code:empty {
+    display: none;
+}
+
+.country-card-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0;
+    padding: 39px 0 35px;
+    border-top: 1px solid var(--country-line);
+    border-bottom: 1px solid var(--country-line);
+}
+
+.country-card-fact {
+    min-width: 0;
+}
+
+.country-card-fact dt {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--country-muted);
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.country-card-fact dt svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+}
+
+.country-card-fact dd {
+    margin: 17px 0 0;
+    font-size: 25px;
+    font-weight: 650;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.country-card-open {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    margin: 0;
+    padding: 38px 0 5px;
+    border: 0;
+    background: transparent;
+    color: var(--country-muted);
+    font: inherit;
+    font-size: 22px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Область нажатия охватывает всю карточку. */
+.country-card-open::after {
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    content: '';
+}
+
+.country-card-open:focus-visible {
+    outline: none;
+}
+
+.country-card-open:focus-visible::after {
+    outline: 3px solid #3668b3;
+    outline-offset: 4px;
+}
+
+.country-card-open svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+html:has(.country-modal[open]) {
+    overflow: hidden;
+}
+
+.country-modal {
+    box-sizing: border-box;
+    width: min(680px, calc(100% - 32px));
+    max-width: none;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid #e5e5e5;
+    border-radius: 28px;
+    background: #fcfcfc;
+    color: #111;
+    font: inherit;
+    box-shadow: 0 24px 80px rgb(0 0 0 / 20%);
+}
+
+.country-modal::backdrop {
+    background: rgb(15 23 42 / 48%);
+    backdrop-filter: blur(4px);
+}
+
+.country-modal-content {
+    position: relative;
+    padding: 36px;
+}
+
+.country-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border: 0;
+    border-radius: 50%;
+    background: #eee;
+    color: #444;
+    cursor: pointer;
+}
+
+.country-modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+.country-modal-close:focus-visible,
+.country-modal-retry:focus-visible {
+    outline: 3px solid #3668b3;
+    outline-offset: 3px;
+}
+
+.country-modal-header {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+    margin-top: 12px;
+    padding-right: 12px;
+}
+
+.country-modal-description {
+    margin: 28px 0;
+    color: #555;
+    font-size: 17px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.country-modal-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 28px;
+    margin: 0;
+}
+
+.country-modal-fact {
+    min-width: 0;
+    padding: 20px 0;
+    border-top: 1px solid #e5e5e5;
+}
+
+.country-modal-fact dt {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.country-modal-fact dd {
+    margin: 8px 0 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.country-modal-status {
+    margin: 16px 0 0;
+    color: #666;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.country-modal-status:empty {
+    display: none;
+}
+
+.country-modal-retry {
+    margin-top: 12px;
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    color: #333;
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+@media (max-width: 1000px) {
+    .country-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .country-card {
+        padding: 20px;
+        border-radius: 24px;
+    }
+
+    .country-card-header {
+        gap: 12px;
+        padding-bottom: 24px;
+    }
+
+    .country-card-flag {
+        border-radius: 16px;
+    }
+
+    .country-card-name {
+        font-size: 24px;
+    }
+
+    .country-card-region {
+        margin-top: 7px;
+        font-size: 16px;
+    }
+
+    .country-card-code {
+        padding-top: 4px;
+        font-size: 13px;
+    }
+
+    .country-card-details {
+        gap: 12px;
+        padding: 26px 0;
+    }
+
+    .country-card-fact dt {
+        font-size: 15px;
+    }
+
+    .country-card-fact dd {
+        margin-top: 12px;
+        font-size: 20px;
+    }
+
+    .country-card-open {
+        padding-top: 25px;
+        font-size: 18px;
+    }
+
+    .country-card-open::after {
+        border-radius: 24px;
+    }
+
+    .country-modal-content {
+        padding: 24px;
+    }
+
+    .country-modal-header {
+        grid-template-columns: 88px minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 24px;
+        padding-right: 0;
+    }
+
+    .country-modal-facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .country-card {
+        transition: none;
+    }
+}
